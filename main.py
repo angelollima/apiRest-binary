@@ -37,7 +37,7 @@ def everything(letter: str | None=None, number: int | None=None, punctuation: st
 
 @app.get("/letters/")
 def letters():
-    all_letters = {letter: f'{ord(letter):08b}' for letter in upper_lower_letters}
+    all_letters = {letter: f'{ord(letter):08b}' for letter in upper_lower_letters()}
     all_accentuation_letters = {accentuation: f'{ord(accentuation):08b}' for accentuation in words_accent()}
     return all_letters, all_accentuation_letters
 
