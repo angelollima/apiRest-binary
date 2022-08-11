@@ -1,20 +1,19 @@
 import uvicorn
-import asyncio
 from fastapi import FastAPI
-from ascii import *
+from formation import *
 
 app = FastAPI()
 
 @app.get("/")
-async def everything(letter: str | None=None, number: int | None=None):
+def everything(letter: str | None=None, number: int | None=None, punctuation: str | None=None):
     all_letters = {letter: f'{ord(letter):08b}' for letter in upper_lower_letters()}
     all_accentuation_letters = {accentuation: f'{ord(accentuation):08b}' for accentuation in words_accent()}
     all_numbers = {number: f"{number:b}" for number in digits()}
     all_punctuation = {punctuation: f'{ord(punctuation):08b}' for punctuation in punctuation_methods()}
-    if letter is None and number is None:
+    if letter is None and number is None and punctuation is None:
         resposta = ({
             "letters": all_letters,
-            "letters with accent": [all_accentuation_letters],
+            "letters_with_accent": all_accentuation_letters,
             "punctuations": all_punctuation,
             "numbers": all_numbers
         })
@@ -26,9 +25,12 @@ async def everything(letter: str | None=None, number: int | None=None):
                 response.append({k: v})
         for k, v in all_accentuation_letters.items():
             if k == letter:
-                response.append({k, v})
+                response.append({k: v})
         for k, v in all_numbers.items():
             if int(k) == number:
+                response.append({k: v})
+        for k, v in all_punctuation.items():
+            if k == punctuation:
                 response.append({k: v})
         return response
 
@@ -42,20 +44,14 @@ def letters():
 
 @app.get("/numbers/")
 def numbers():
-    all_numbers = {number: f"{number:08b}" for number in digits()}
+    all_numbers = {number: f"{number:8b}" for number in digits()}
     return all_numbers
 
 
-@app.get("/punctuation/")
+@app.get("/punctuations/")
 def punctuation():
     all_punctuation = {punctuation: f'{ord(punctuation):08b}' for punctuation in punctuation_methods()}
     return all_punctuation
 
-
-async def main():
-    config = uvicorn.Config("main:app", host="127.0.0.1", port=8000, reload=True)
-    server = uvicorn.Server(config)
-    await server.serve()
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
